@@ -4,7 +4,7 @@ import time
 connect = sql.connect('planner.db')
 cursor = connect.cursor()
 
-cursor.execute("CREATE TABLE IF NOT EXISTS tasks (task_id INTEGER PRIMARY KEY, task TEXT, type TEXT, time REAL)")
+cursor.execute("CREATE TABLE IF NOT EXISTS tasks (task_id INTEGER PRIMARY KEY, task TEXT UNIQUE, type TEXT, time REAL)")
 
 def get_choice(max, phrase, do_phrase=True):
     choice = 0
@@ -26,17 +26,11 @@ def get_tasks():
     cursor.execute("SELECT * FROM tasks")
     return cursor.fetchall()
 
-def display_tasks(tasks, numbers=True):
-    if numbers:
-        print('\n{:<5}  {:<15}  {:<15}  {:<15}'.format('ID', 'Task', 'Type', 'Time'))
-        print('{:<5}  {:<15}  {:<15}  {:<15}'.format('---', '-----', '-----', '-----'))
-        for task in tasks:
-            print('{:<5}  {:<15}  {:<15}  {:<15}'.format(task[0] + 1, task[1], task[2], task[3]))
-    else:
-        print('\n{:<15}  {:<15}  {:<15}'.format('Task', 'Type', 'Time'))
-        print('{:<15}  {:<15}  {:<15}'.format('-----', '-----', '-----'))
-        for task in tasks:
-            print('{:<15}  {:<15}  {:<15}'.format(task[1], task[2], task[3]))
+def display_tasks(tasks):
+    print('\n{:<15}  {:<15}  {:<15}'.format('Task', 'Type', 'Time'))
+    print('{:<15}  {:<15}  {:<15}'.format('-----', '-----', '-----'))
+    for task in tasks:
+        print('{:<15}  {:<15}  {:<15}'.format(task[1], task[2], task[3]))
 
 print('Welcome to your planner!')
 
@@ -48,7 +42,7 @@ while choice != 3:
     if choice == 1:
         #if user chooses choice 1, display all tasks, the task type, and the task time
         tasks = get_tasks()
-        display_tasks(tasks, False)
+        display_tasks(tasks)
 
     if choice == 2:
         # if user choose choice 2, display the choices for editing and allow for answer
@@ -61,29 +55,31 @@ while choice != 3:
             while hours < 0:
                 try:
                     hours = float(input('Time to complete in hours: '))
+                    if hours < 0:
+                        print('\nNot a valid number.\n')
+                        time.sleep(.5)
                 except ValueError:
                     print('\nNot a valid number.\n')
                     time.sleep(.5)
             tasks = get_tasks()
-            values = (len(tasks), task, type, hours)
+            values = (None, task, type, hours)
             cursor.execute("INSERT INTO tasks VALUES (?, ?, ?, ?)", values) #insert the ID, and the inputs from the user to the database
             connect.commit()
         elif choice == 2:
             tasks = get_tasks()
             display_tasks(tasks)
-            choice = get_choice(len(tasks), '\nWhich number task would you like to edit? ')
-            task_id = choice - 1
+            print('\nWhich task would you like to edit?')
+            edit = input('-> ')
             choice = get_choice(3, '\nWould you like to edit:\n1). Task\n2). Type\n3). Time')
-
             if choice == 1:
                 task = input('\nTask: ')
-                values = (task, task_id)
-                cursor.execute("UPDATE tasks SET task = ? WHERE task_id = ?", values)
+                values = (task, edit)
+                cursor.execute("UPDATE tasks SET task = ? WHERE task = ?", values)
                 connect.commit()
             elif choice == 2:
                 type = input('\nType of task: ')
-                values = (type, task_id)
-                cursor.execute("UPDATE tasks SET type = ? WHERE task_id = ?", values)
+                values = (type, edit)
+                cursor.execute("UPDATE tasks SET type = ? WHERE task = ?", values)
                 connect.commit()
             elif choice == 3:
                 choice = None
@@ -98,38 +94,26 @@ while choice != 3:
                         print('\nNot a valid number.')
                         time.sleep(.5)
                         hours = -1
-                values = (hours, task_id)
-                cursor.execute("UPDATE tasks SET time = ? WHERE task_id = ?", values)
+                values = (hours, edit)
+                cursor.execute("UPDATE tasks SET time = ? WHERE task = ?", values)
                 connect.commit()
-                
-
-
         elif choice == 3:
             tasks = get_tasks()
             choice = 0
-            while choice < 1 or choice > len(tasks):
-                display_tasks(tasks)
-                choice = get_choice(len(tasks), '\nWhich number task would you like to delete?')
-            task_id = choice - 1
-            values = (task_id,)
-            cursor.execute("DELETE FROM tasks WHERE task_id = ?", values)
+            display_tasks(tasks)
+            print('\nWhich task would you like to delete?')
+            choice = input('-> ')
+            values = (choice,)
+            cursor.execute("DELETE FROM tasks WHERE task = ?", values)
             connect.commit()
-            tasks = get_tasks()
-            for task in tasks:
-                if task[0] > task_id: 
-                    values = (task[0] - 1, task_id)
-                    cursor.execute("UPDATE tasks SET task_id = ? WHERE task_id = ?", values)
-                    connect.commit()
-            choice = None
             
-
-
-
         elif choice == 4:
-            verify = input('\nAre you sure you want to reset the planner (y/n)? ')
+            verify = input('\nAre you sure you want to reset the planner (y/n)? ').lower()
+            if verify == 'y':
+                cursor.execute('DELETE FROM tasks')
+            else:
+                pass
         elif choice == 5:
-            pass
-        else:
             pass
 
         
