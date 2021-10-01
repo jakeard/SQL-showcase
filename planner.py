@@ -4,7 +4,7 @@ import time
 connect = sql.connect('planner.db')
 cursor = connect.cursor()
 
-cursor.execute("CREATE TABLE IF NOT EXISTS tasks (task_id INTEGER PRIMARY KEY, task TEXT UNIQUE, time REAL, date TEXT, type_id INTEGER, FOREIGN KEY(type_id) REFERENCES types(type_id))")
+cursor.execute("CREATE TABLE IF NOT EXISTS tasks (task_id INTEGER PRIMARY KEY, task TEXT UNIQUE, time REAL, year TEXT, month TEXT, day TEXT, type_id INTEGER, FOREIGN KEY(type_id) REFERENCES types(type_id))")
 cursor.execute("CREATE TABLE IF NOT EXISTS types (type_id INTEGER PRIMARY KEY, type TEXT UNIQUE)")
 
 cursor.execute('SELECT * FROM types')
@@ -42,7 +42,7 @@ def get_choice(max, phrase, do_phrase=True):
     return choice
 
 def get_all():
-    cursor.execute("SELECT ta.task, ty.type, ta.date, ta.time FROM tasks ta JOIN types ty ON ta.type_id = ty.type_id ORDER BY ta.date")
+    cursor.execute("SELECT ta.task, ty.type, (ta.month || '/' || ta.day || '/' || ta.year) AS date, ta.time FROM tasks ta JOIN types ty ON ta.type_id = ty.type_id ORDER BY ta.year, ta.month, ta.day, ta.time")
     return cursor.fetchall()
 
 def get_tasks():
@@ -69,6 +69,7 @@ def get_value(data, new=False):
                         print('\nNot a valid number.')
                         time.sleep(.5)
             else:
+                date = []
                 correct = False
                 cursor.execute("SELECT strftime('%Y', date('now'))")
                 current_date = cursor.fetchall()
@@ -82,6 +83,7 @@ def get_value(data, new=False):
                         time.sleep(.5)
                     else:
                         correct = True
+                        date.append(year)
                 correct = False
                 while not correct:
                     caught = False
@@ -101,6 +103,7 @@ def get_value(data, new=False):
                         time.sleep(.5)
                     else:
                         correct = True
+                        date.append(month)
                 correct = False
                 cursor.execute("SELECT strftime('%d', date('now'))")
                 current_date = cursor.fetchall()
@@ -123,7 +126,7 @@ def get_value(data, new=False):
                         time.sleep(.5)
                     else:
                         correct = True
-                    date = f'{month}-{day}-{year}'
+                        date.append(day)
                 return date
             if value < 0:
                 print('\nNot a valid number.')
@@ -131,6 +134,7 @@ def get_value(data, new=False):
         except ValueError:
             print('\nNot a valid number.')
             time.sleep(.5)
+            value = -1
     return value 
 
 def display_tasks():
@@ -161,9 +165,9 @@ while choice != 3:
         choice = get_choice(5, '\nWould you like to:\n1). Add\n2). Edit\n3). Delete\n4). Reset planner\n5). Go back')
 
         if choice == 1:
-            bad = False
             passed = False
             while not passed:
+                bad = False
                 task = input('Task: ')
                 tasks = get_tasks()
                 for i in tasks:
@@ -172,21 +176,37 @@ while choice != 3:
                             print('\nTask already exists.\n')
                             time.sleep(.5)
                             bad = True
+                            break
+                    if bad:
+                        break
                 if not bad:
                     passed = True
             display_types()
             type_id = get_value('type')
             hours = get_value('hours')
             date = get_value('date')
-            values = (None, task, hours, date, type_id)
-            cursor.execute("INSERT INTO tasks VALUES (?, ?, ?, ?, ?)", values)
+            values = (None, task, hours, date[0], date[1], date[2], type_id)
+            cursor.execute("INSERT INTO tasks VALUES (?, ?, ?, ?, ?, ?, ?)", values)
             connect.commit()
 
         elif choice == 2:
             display_tasks()
-            print('\nWhich task would you like to edit?')
-            edit = input('-> ')
-            choice = get_choice(3, '\nWould you like to edit:\n1). Task\n2). Type\n3). Time')
+            tasks = get_tasks()
+            bad = True
+            while bad:
+                print('\nWhich task would you like to edit?')
+                edit = input('-> ')
+                for i in tasks:
+                    for j in i:
+                        if edit == j:
+                            bad = False
+                            break
+                    if not bad:
+                        break
+                if bad:
+                    print('\nNot a valid task.')
+                    time.sleep(.5)
+            choice = get_choice(4, '\nWould you like to edit:\n1). Task\n2). Type\n3). Due date\n4). Time')
             if choice == 1:
                 task = input('Task: ')
                 values = (task, edit)
@@ -198,6 +218,10 @@ while choice != 3:
                 cursor.execute("UPDATE tasks SET type_id = ? WHERE task = ?", values)
             elif choice == 3:
                 choice = None
+                date = get_value('date')
+                values = (date[0], date[1], date[2], edit)
+                cursor.execute("UPDATE tasks SET year = ?, month = ?, day = ? WHERE task = ?", values)
+            elif choice == 4:
                 hours = get_value('hours')
                 values = (hours, edit)
                 cursor.execute("UPDATE tasks SET time = ? WHERE task = ?", values)
