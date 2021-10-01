@@ -34,13 +34,13 @@ I used Visual Studio Code with python to create this project, and used the built
 * Python
 * SQLite3
 
-# Useful Websites
+## Useful Websites
 
 * [SQLite Tutorial](http://www.sqlitetutorial.net/)
 * [Python Homepage](http://www.python.org/)
 * [W3 Schools](http://www.w3schools.com/sql/)
 
-# Future Work
+## Future Work
 
 * Make program appear in a window
 * Add more items to be input so I can use more tables to help with practice
