@@ -1,36 +1,49 @@
-# Overview
+# SQL Database With Python
 
-{Important!  Do not say in this section that this is college assignment.  Talk about what you are trying to accomplish as a software engineer to further your learning.}
+This is my **SQL Database in Python Demo** software. I decided to make this demo to research, gain an understanding of, and showcase my understanding in using SQL in python to create a database and be able to access and modify it using queries. To do this, I created a planner that can store and modify data entered by the user.
 
-{Provide a description the software that you wrote and how it integrates with a SQL Relational Database. Describe how to use your program.}
+Some of the commands I use in the queries are:
 
-{Describe your purpose for writing this software.}
+* CREATE
+* INSERT
+* SELECT
+* UPDATE
+* DELETE
+* CONCAT
+* ORDER BY
+* INNER JOIN
+* DATE (%m/%d/%Y)
 
 {Provide a link to your YouTube demonstration.  It should be a 4-5 minute demo of the software running, a walkthrough of the code, and a view of how created the Relational Database.}
 
 [Software Demo Video](http://youtube.link.goes.here)
 
-# Relational Database
+## Relational Database
 
-{Describe the relational database you are using.}
+The relational database that I am using is SQLite3, which is already included in the default python libraries.
 
-{Describe the structure (tables) of the relational database that you created.}
+The database has two tables, one named **tasks** and one named **types**. Tasks contains the task_id, task, year, month, day, and time. Types contains the type_id, and type. Using an **INNER JOIN**, I am able to do **SELECT** queries that use the type_id to get the type name, and display it to the user. The database is structured as shown below:
 
-# Development Environment
+![Entity Relationship Diagram](ERD.png)
 
-{Describe the tools that you used to develop the software}
+## Development Environment
 
-{Describe the programming language that you used and any libraries.}
+I used Visual Studio Code with python to create this project, and used the built in SQLite3 library to create and query the database.
+
+### Tools
+
+* Visual Studio Code
+* Python
+* SQLite3
 
 # Useful Websites
 
-{Make a list of websites that you found helpful in this project}
-* [Web Site Name](http://url.link.goes.here)
-* [Web Site Name](http://url.link.goes.here)
+* [SQLite Tutorial](http://www.sqlitetutorial.net/)
+* [Python Homepage](http://www.python.org/)
+* [W3 Schools](http://www.w3schools.com/sql/)
 
 # Future Work
 
-{Make a list of things that you need to fix, improve, and add in the future.}
-* Item 1
-* Item 2
-* Item 3
+* Make program appear in a window
+* Add more items to be input so I can use more tables to help with practice
+* Create a new database that can work with a game
