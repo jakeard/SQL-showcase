@@ -16,7 +16,7 @@ Some of the commands I use in the queries are:
 
 {Provide a link to your YouTube demonstration.  It should be a 4-5 minute demo of the software running, a walkthrough of the code, and a view of how created the Relational Database.}
 
-[Software Demo Video](http://youtube.link.goes.here)
+[Software Demo Video](http://youtu.be/P3rYR_V8G-s)
 
 ## Relational Database
 
@@ -24,7 +24,7 @@ The relational database that I am using is SQLite3, which is already included in
 
 The database has two tables, one named **tasks** and one named **types**. Tasks contains the task_id, task, year, month, day, and time. Types contains the type_id, and type. Using an **INNER JOIN**, I am able to do **SELECT** queries that use the type_id to get the type name, and display it to the user. The database is structured as shown below:
 
-![Entity Relationship Diagram](ERD.png)
+![Entity Relationship Diagram](ERD.jpg)
 
 ## Development Environment
 
